@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'newsie
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+Resources:
+  NewsieFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://newsie/e9fa94d21f390582d0e6b96f56161c61
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Events:
+        Newsie:
+          Type: Api
+          Properties:
+            Path: /post_news
+            Method: post
+Outputs:
+  NewsieApi:
+    Description: API Gateway endpoint URL for Prod stage for Newsie function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/post_news/
+  NewsieFunction:
+    Description: Newsie Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - NewsieFunction
+      - Arn
+  NewsieFunctionIamRole:
+    Description: Implicit IAM Role created for Newsie function
+    Value:
+      Fn::GetAtt:
+      - NewsieFunctionRole
+      - Arn

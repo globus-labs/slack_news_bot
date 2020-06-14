@@ -1,0 +1,82 @@
+{
+  "body": "token=5nJEowFIX7ojlIq0pAVRbqiN&team_id=T014S6EGNKG&team_domain=maxsslackworkspace&channel_id=C015BGWK109&channel_name=general&user_id=U014XGU8LFP&user_name=maksim.levental&command=%2Fnewsie&text=adfadgsdfg&response_url=https%3A%2F%2Fhooks.slack.com%2Fcommands%2FT014S6EGNKG%2F1166983580007%2FblGo7HUGukhdynHlJjZIj9lJ&trigger_id=1187905814980.1162218566662.75363f068e0a1c4f9c72d3a823066e81",
+  "headers": {
+    "Accept": "application/json,*/*",
+    "Accept-Encoding": "gzip,deflate",
+    "Content-Length": "388",
+    "Content-Type": "application/x-www-form-urlencoded",
+    "Host": "dfb60d20e490.ngrok.io",
+    "User-Agent": "Slackbot 1.0 (+https://api.slack.com/robots)",
+    "X-Forwarded-For": "54.89.162.56",
+    "X-Forwarded-Port": "3000",
+    "X-Forwarded-Proto": "http",
+    "X-Slack-Request-Timestamp": "1591988894",
+    "X-Slack-Signature": "v0=14288c494c01045d8b86f69029fc87645520a6849617e8608063319700f07daf"
+  },
+  "httpMethod": "POST",
+  "isBase64Encoded": false,
+  "multiValueHeaders": {
+    "Accept": [
+      "application/json,*/*"
+    ],
+    "Accept-Encoding": [
+      "gzip,deflate"
+    ],
+    "Content-Length": [
+      "388"
+    ],
+    "Content-Type": [
+      "application/x-www-form-urlencoded"
+    ],
+    "Host": [
+      "dfb60d20e490.ngrok.io"
+    ],
+    "User-Agent": [
+      "Slackbot 1.0 (+https://api.slack.com/robots)"
+    ],
+    "X-Forwarded-For": [
+      "54.89.162.56"
+    ],
+    "X-Forwarded-Port": [
+      "3000"
+    ],
+    "X-Forwarded-Proto": [
+      "http"
+    ],
+    "X-Slack-Request-Timestamp": [
+      "1591988894"
+    ],
+    "X-Slack-Signature": [
+      "v0=14288c494c01045d8b86f69029fc87645520a6849617e8608063319700f07daf"
+    ]
+  },
+  "multiValueQueryStringParameters": null,
+  "path": "/post_news",
+  "pathParameters": null,
+  "queryStringParameters": null,
+  "requestContext": {
+    "accountId": "123456789012",
+    "apiId": "1234567890",
+    "extendedRequestId": null,
+    "httpMethod": "POST",
+    "identity": {
+      "accountId": null,
+      "apiKey": null,
+      "caller": null,
+      "cognitoAuthenticationProvider": null,
+      "cognitoAuthenticationType": null,
+      "cognitoIdentityPoolId": null,
+      "sourceIp": "127.0.0.1",
+      "user": null,
+      "userAgent": "Custom User Agent String",
+      "userArn": null
+    },
+    "path": "/post_news",
+    "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
+    "resourceId": "123456",
+    "resourcePath": "/post_news",
+    "stage": "Prod"
+  },
+  "resource": "/post_news",
+  "stageVariables": null
+}
