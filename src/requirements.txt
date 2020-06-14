@@ -1,3 +1,2 @@
 requests
 github3.py
-slackclient

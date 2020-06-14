@@ -1,5 +1,4 @@
 github3.py
-slackclient
 requests
 aws-sam-cli
 awscli
