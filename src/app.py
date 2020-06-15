@@ -4,13 +4,14 @@ import hashlib
 import hmac
 import os
 import re
-from pprint import pprint
 from urllib import parse
 
 import github3
 import requests
 
 GH_APP_PEM_FP = "./globus-newsie.2020-06-06.private-key.pem"
+GH_REPO = os.environ["GH_REPO"]
+GH_POST_PATH = "_posts"
 GH_APP_ID = int(os.environ["GH_APP_ID"])
 GH_APP_INSTALL_ID = int(os.environ["GH_APP_INSTALL_ID"])
 
@@ -49,65 +50,107 @@ with open("post_template.md") as f:
 
 POSSIBLE_TYPES = {"paper", "award", "presentation", "join"}
 
+GH_CLIENT.login_as_app_installation(
+    private_key_pem=KEY_FILE_PEM, app_id=GH_APP_ID, installation_id=GH_APP_INSTALL_ID
+)
+ACCESS_TOKEN = GH_CLIENT.session.auth.token
+
+
+def get_posts():
+    path = f"https://api.github.com/repos/{GH_REPO}/contents/{GH_POST_PATH}/"
+    response = requests.get(
+        path,
+        headers={
+            "Authorization": "token " + ACCESS_TOKEN,
+            "Accept": "application/vnd.github.machine-man-preview+json",
+        },
+    )
+    if response.status_code != 200:
+        return []
+    return [f for f in response.json() if "markdown" in f["name"]]
+
+
+def find_post(title):
+    posts = get_posts()
+    return [p for p in posts if "-".join(title.split()) in p["name"]]
+
 
 def post_news(slack_text, slack_user):
     try:
+        if "warmup" in slack_text:
+            return "warmed up"
+
         match = re.search(
-            r"\s*(?P<warmup>warmup)?\s*title:\s*(?P<title>.*)type:\s*(?P<type>.*)text:\s*(?P<text>.*)sha:\s*(?P<sha>.*)",
+            r"(?:delete)?"
+            r"(?:warmup)?"
+            r"(?:title:(?P<title>.*?))"
+            r"((?:type:(?P<type>.*?))?(?:text:(?P<text>.*?))?$|$)",
             slack_text,
         )
         if not match.groups():
             return f"sorry you're missing something; i didn't get anything from you"
-        if match.group("warmup"):
-            return "warmed up"
 
-        title, text, type, sha = (
-            match.group("title").strip(),
-            match.group("text").strip(),
-            match.group("type").strip(),
-            match.group("sha").strip(),
+        title, text, type = (
+            match.group("title"),
+            match.group("text"),
+            match.group("type"),
         )
-        if not title or not text or not type or not type in POSSIBLE_TYPES:
+        delete = "delete" in slack_text
+
+        if delete and not title:
+            return "you need `title` if you want to delete"
+        elif (
+            not delete and not (title and text and type) and type not in POSSIBLE_TYPES
+        ):
             return f"sorry you're missing something; here's what i got from you: title:{title} text:{text} type:{type}"
 
-        GH_CLIENT.login_as_app_installation(
-            private_key_pem=KEY_FILE_PEM,
-            app_id=GH_APP_ID,
-            installation_id=GH_APP_INSTALL_ID,
-        )
-        access_token = GH_CLIENT.session.auth.token
-
         today = datetime.datetime.today()
+        found_post = find_post(title)
+        if found_post:
+            path = found_post[0]["url"]
+            sha = found_post[0]["sha"]
+        else:
+            path = f"https://api.github.com/repos/{GH_REPO}/contents/{GH_POST_PATH}/{today.date()}-{'-'.join(title.split())}.markdown"
+            sha = ""
         post = POST_TEMPLATE_STR.format(
             title=title, date=str(today), type=type, text=text
         )
-        post = base64.b64encode(bytes(post, "utf-8")).decode("utf-8")
-        path = f"https://api.github.com/repos/makslevental/aliza_bot/contents/{today.date()}-{'-'.join(title.split())}.markdown"
-        response = requests.put(
-            path,
-            headers={
-                "Authorization": "token " + access_token,
-                "Accept": "application/vnd.github.machine-man-preview+json",
-            },
-            json={
-                "message": f"news posted",
-                "committer": {"name": slack_user, "email": f"{slack_user}@globus.org"},
-                "content": post,
-                "sha": sha,
-            },
-        )
+        post_encoded = base64.b64encode(bytes(post, "utf-8")).decode("utf-8")
+        post_json = {
+            "message": f"news updated",
+            "committer": {"name": slack_user, "email": f"{slack_user}@globus.org"},
+            "content": post_encoded,
+            "sha": sha,
+        }
+        headers = {
+            "Authorization": "token " + ACCESS_TOKEN,
+            "Accept": "application/vnd.github.machine-man-preview+json",
+        }
+
+        if delete:
+            response = requests.delete(path, headers=headers, json=post_json)
+        else:
+            response = requests.put(path, headers=headers, json=post_json)
+
         if response.status_code not in {200, 201}:
             return f"something went wrong: {response.json()['message']}"
         else:
-            return f"news posted @ {response.json()['content']['html_url']}. if you want to update then use `sha: {response.json()['content']['sha']}`"
+            if delete:
+                return "post deleted"
+            else:
+                return f"news posted @ {response.json()['content']['html_url']}. if you want to update then use the same title"
     except Exception as e:
         return f"exception: {e}"
 
 
 if __name__ == "__main__":
-    print(
-        post_news(
-            "title: asd   fsd  sasdasd  sadfsd fsd f a df a d f type: paper text: upd ated2 sha: 62e7a8252c687e1c1d953e8773b4a3f361dd7ae1",
-            "ax",
-        )
-    )
+    # print(
+    #     post_news(
+    #         "title: asd   fsd  sasdasd  sadfsd fsd f a df a d f type: paper text: upd ated2 sha: 62e7a8252c687e1c1d953e8773b4a3f361dd7ae1",
+    #         "ax",
+    #     )
+    # )
+    print(post_news("delete title: will it work", "ax"))
+    # print(
+    #     post_news("title: will it work type: paper text: gsjksf  update hgkjfdhg", "ax")
+    # )

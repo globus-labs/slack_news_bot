@@ -11,11 +11,12 @@ The **App ID** is 67866.
 Go here and install [globus-newsie](https://github.com/apps/globus-newsie). 
 Then note the **Install ID** which is at the end of the url of the configure page: https://github.com/settings/installations/**9548427**.
 
-You'll need to set as an env variable
+Here are the env variabels you need to set
 
 ```
 GH_APP_ID = 67866
 GH_APP_INSTALL_ID = .....
+GH_REPO = ....
 ```
 
 Get the .pem from Max and put it at 
@@ -35,6 +36,6 @@ Get the `SLACK_SIGNING_SECRET` from Max and set it as an env variable as well.
 
 `/newsie warmup` will warm up the container. Use it twice to - first time will start the container and the second time will return `warmed up`.
 
-`/newsie title: <title> type: <type> text: <text>` will post a new news item. Return message will include a file `sha` that you can use to update or delete.
+`/newsie title: <title> type: <type> text: <text>` will post or edit a news item. To edit make sure to use the same title (**OBVIOUSLY THIS MATCHES ON TITLE SO DON'T REUSE TITLES EVEN ACROSS DATES**).
 
-`/newsie title: <title> type: <type> text: <text> sha: <sha>` to update a news item. Use the same title.
+`/newsie delete title: <title>` deletes post titled `title`.
