@@ -4,12 +4,13 @@ import hashlib
 import hmac
 import os
 import re
+from pprint import pprint
 from urllib import parse
 
 import github3
 import requests
 
-GH_APP_PEM_FP = os.environ["GH_APP_PEM_FP"]
+GH_APP_PEM_FP = "./globus-newsie.2020-06-06.private-key.pem"
 GH_APP_ID = int(os.environ["GH_APP_ID"])
 GH_APP_INSTALL_ID = int(os.environ["GH_APP_INSTALL_ID"])
 
@@ -52,15 +53,19 @@ POSSIBLE_TYPES = {"paper", "award", "presentation", "join"}
 def post_news(slack_text, slack_user):
     try:
         match = re.search(
-            r"\s*title:\s*(?P<title>.*)type:\s*(?P<type>.*)text:\s*(?P<text>.*)",
+            r"\s*(?P<warmup>warmup)?\s*title:\s*(?P<title>.*)type:\s*(?P<type>.*)text:\s*(?P<text>.*)sha:\s*(?P<sha>.*)",
             slack_text,
         )
         if not match.groups():
             return f"sorry you're missing something; i didn't get anything from you"
-        title, text, type = (
+        if match.group("warmup"):
+            return "warmed up"
+
+        title, text, type, sha = (
             match.group("title").strip(),
             match.group("text").strip(),
             match.group("type").strip(),
+            match.group("sha").strip(),
         )
         if not title or not text or not type or not type in POSSIBLE_TYPES:
             return f"sorry you're missing something; here's what i got from you: title:{title} text:{text} type:{type}"
@@ -88,15 +93,21 @@ def post_news(slack_text, slack_user):
                 "message": f"news posted",
                 "committer": {"name": slack_user, "email": f"{slack_user}@globus.org"},
                 "content": post,
+                "sha": sha,
             },
         )
-        if response.status_code != 201:
+        if response.status_code not in {200, 201}:
             return f"something went wrong: {response.json()['message']}"
         else:
-            return f"news posted @ {path.replace('api.', '').replace('repos/', '').replace('contents', 'blob/master')}"
+            return f"news posted @ {response.json()['content']['html_url']}. if you want to update then use `sha: {response.json()['content']['sha']}`"
     except Exception as e:
         return f"exception: {e}"
 
 
 if __name__ == "__main__":
-    print(post_news("title: asd fsdf a df a d f type: paper text: 343gdghdfkjgh", "ax"))
+    print(
+        post_news(
+            "title: asd   fsd  sasdasd  sadfsd fsd f a df a d f type: paper text: upd ated2 sha: 62e7a8252c687e1c1d953e8773b4a3f361dd7ae1",
+            "ax",
+        )
+    )

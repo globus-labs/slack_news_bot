@@ -29,3 +29,12 @@ Go here to install the app
 https://slack.com/oauth/v2/authorize?client_id=1162218566662.1167573384725&scope=chat:write,app_mentions:read,channels:history,commands&user_scope=
 
 Get the `SLACK_SIGNING_SECRET` from Max and set it as an env variable as well.
+
+
+## Commands
+
+`/newsie warmup` will warm up the container. Use it twice to - first time will start the container and the second time will return `warmed up`.
+
+`/newsie title: <title> type: <type> text: <text>` will post a new news item. Return message will include a file `sha` that you can use to update or delete.
+
+`/newsie title: <title> type: <type> text: <text> sha: <sha>` to update a news item. Use the same title.
