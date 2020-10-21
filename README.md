@@ -39,3 +39,5 @@ Get the `SLACK_SIGNING_SECRET` from Max and set it as an env variable as well.
 `/newsie title: <title> type: <type> text: <text>` will post or edit a news item. To edit make sure to use the same title (**OBVIOUSLY THIS MATCHES ON TITLE SO DON'T REUSE TITLES EVEN ACROSS DATES**).
 
 `/newsie delete title: <title>` deletes post titled `title`.
+
+test
